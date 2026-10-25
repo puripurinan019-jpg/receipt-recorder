@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Receipt &amp; Expense Tracker — Design Preview (Phase 2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Palette A — "Ledger Ink" ===== */
+  :root{
+    --bg-base:#F7F8FA;
+    --bg-surface:#FFFFFF;
+    --bg-alt:#EEF1F6;
+    --border:#E2E7EF;
+    --text-1:#0E1726;
+    --text-2:#55617A;
+    --text-3:#8A94A8;
+    --brand:#1F4FD8;
+    --brand-pressed:#1A42B8;
+    --brand-tint:#EAF0FF;
+    --success:#0B7A54;
+    --success-tint:#E6F4EE;
+    --danger:#B42318;
+    --danger-tint:#FCECEA;
+    --warning:#8A5A00;
+    --warning-tint:#FDF3E2;
+
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px;
+    --font: "IBM Plex Sans Thai", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:#EFF2F7; color:var(--text-1);
+    font-family:var(--font); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:48px 24px 96px}
+
+  /* ---- page header ---- */
+  .page-head{margin-bottom:40px}
+  .eyebrow{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin:0 0 10px}
+  .page-head h1{font-size:34px;line-height:1.3;margin:0 0 12px;letter-spacing:-.4px}
+  .page-head p{margin:0;color:var(--text-2);max-width:70ch}
+  .note{
+    margin-top:16px;display:flex;gap:10px;align-items:flex-start;
+    background:#FFF;border:1px solid var(--border);border-left:3px solid var(--brand);
+    border-radius:var(--r-md);padding:12px 14px;font-size:14px;color:var(--text-2)
+  }
+
+  /* ---- section shell ---- */
+  section{margin-top:56px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+  .sec-head .num{font-size:13px;font-weight:700;color:var(--brand);letter-spacing:.06em}
+  .sec-head h2{font-size:22px;margin:0;letter-spacing:-.2px}
+  .sec-head p{margin:0;color:var(--text-2);font-size:14px}
+
+  .card{background:#FFF;border:1px solid var(--border);border-radius:var(--r-lg);padding:24px}
+
+  /* ---- swatches ---- */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+  .sw{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#FFF}
+  .sw .chip{height:64px}
+  .sw .meta{padding:10px 12px}
+  .sw .token{font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-1)}
+  .sw .hex{font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-2);text-transform:uppercase}
+  .sw .use{font-size:12px;color:var(--text-2);margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-2);font-weight:600}
+  td.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+  .pass{color:var(--success);font-weight:600}
+  .warn{color:var(--warning);font-weight:600}
+
+  /* ---- type scale ---- */
+  .type-row{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--border)}
+  .type-row:last-child{border-bottom:0}
+  .type-row .k{font-size:12px;color:var(--text-2);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .t-amount{font-size:34px;line-height:1.2;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .t-h1{font-size:24px;line-height:1.4;font-weight:700}
+  .t-h2{font-size:20px;line-height:1.45;font-weight:600}
+  .t-body{font-size:16px;line-height:1.62;font-weight:400;max-width:60ch}
+  .t-label{font-size:14px;line-height:1.55;font-weight:500;color:var(--text-2)}
+  .t-caption{font-size:12px;line-height:1.5;color:var(--text-2)}
+
+  /* ---- tokens strip ---- */
+  .tok-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+  .space-demo{display:flex;align-items:flex-end;gap:10px;margin-top:10px}
+  .space-demo i{display:block;background:var(--brand-tint);border:1px solid #CFDCFB;border-radius:3px}
+  .radius-demo{display:flex;gap:10px;margin-top:10px}
+  .radius-demo span{width:52px;height:52px;background:var(--brand-tint);border:1px solid #CFDCFB;display:grid;place-items:center;font-size:10px;color:var(--text-2)}
+  .elev-demo{display:flex;gap:14px;margin-top:12px}
+  .elev-demo div{width:88px;height:56px;border-radius:var(--r-md);background:#FFF;display:grid;place-items:center;font-size:11px;color:var(--text-2)}
+
+  /* ---- components ---- */
+  .comp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:48px;padding:0 20px;border-radius:var(--r-md);border:1px solid transparent;
+    font-family:var(--font);font-size:15px;font-weight:600;cursor:default;white-space:nowrap;
+  }
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary.is-pressed{background:var(--brand-pressed)}
+  .btn-primary.is-disabled,.btn-secondary.is-disabled{opacity:.45}
+  .btn-secondary{background:#FFF;color:var(--text-1);border-color:var(--border)}
+  .btn-ghost{background:transparent;color:var(--brand)}
+  .btn-danger{background:var(--danger-tint);color:var(--danger)}
+  .btn-sm{height:38px;font-size:14px;padding:0 14px}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%}
+
+  .field label{display:block;font-size:14px;font-weight:500;color:var(--text-2);margin-bottom:6px}
+  .field input,.field textarea{
+    width:100%;height:48px;padding:0 14px;border-radius:var(--r-md);
+    border:1px solid var(--border);background:var(--bg-alt);color:var(--text-1);
+    font-family:var(--font);font-size:16px;
+  }
+  .field .hint{font-size:12px;color:var(--text-3);margin-top:6px}
+  .field.is-error input{border-color:var(--danger);background:#FFF}
+  .field .err{font-size:12px;color:var(--danger);margin-top:6px}
+
+  .pill{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;background:#FFF;border:1px solid var(--border);color:var(--text-2)}
+  .pill.is-active{background:var(--brand-tint);border-color:#CFDCFB;color:var(--brand)}
+
+  .status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px}
+  .s-synced{background:var(--success-tint);color:var(--success)}
+  .s-pending{background:var(--bg-alt);color:var(--text-2)}
+  .s-syncing{background:var(--brand-tint);color:var(--brand)}
+  .s-failed{background:var(--danger-tint);color:var(--danger)}
+  .s-review{background:var(--warning-tint);color:var(--warning)}
+
+  .skel{background:linear-gradient(90deg,#EEF1F6 25%,#E4E9F1 37%,#EEF1F6 63%);background-size:400% 100%;border-radius:6px;height:12px}
+
+  /* ================= phone frames ================= */
+  .phones{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:32px;margin-top:8px}
+  .phone-wrap{display:flex;flex-direction:column;gap:10px}
+  .phone-cap{display:flex;align-items:baseline;gap:8px;padding-left:4px}
+  .phone-cap b{font-size:14px}
+  .phone-cap span{font-size:12px;color:var(--text-2)}
+  .phone{
+    width:100%;max-width:360px;background:var(--bg-base);border:1px solid var(--border);
+    border-radius:28px;overflow:hidden;box-shadow:0 12px 32px rgba(14,23,38,.09);
+    display:flex;flex-direction:column;
+  }
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 2px;font-size:12px;font-weight:600;color:var(--text-1)}
+  .statusbar .dots{display:flex;gap:3px;align-items:center}
+  .statusbar .dots i{display:block;width:5px;height:5px;border-radius:50%;background:var(--text-1);opacity:.85}
+  .statusbar .batt{width:18px;height:9px;border:1.5px solid var(--text-1);border-radius:2px;margin-left:2px}
+
+  .screen{padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px;min-height:640px}
+  .screen.scroll{justify-content:flex-start}
+
+  .hdr{display:flex;justify-content:space-between;align-items:center}
+  .hdr h3{margin:0;font-size:22px;font-weight:700;letter-spacing:-.2px}
+  .hdr .sub{font-size:12px;color:var(--text-2);margin-top:1px}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:14px}
+
+  .pcard{background:#FFF;border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
+  .pcard.tight{padding:12px 14px}
+  .lbl{font-size:12px;color:var(--text-2);font-weight:500}
+  .amount{font-size:34px;font-weight:700;line-height:1.25;letter-spacing:-.6px;font-variant-numeric:tabular-nums;margin:2px 0 6px}
+  .delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+  .delta.up{background:var(--danger-tint);color:var(--danger)}
+  .delta.down{background:var(--success-tint);color:var(--success)}
+
+  .seg{display:inline-flex;background:var(--bg-alt);border-radius:10px;padding:3px;gap:2px}
+  .seg span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;color:var(--text-2)}
+  .seg span.on{background:#FFF;color:var(--text-1);box-shadow:0 1px 2px rgba(14,23,38,.08)}
+
+  .link{font-size:12px;font-weight:600;color:var(--brand);display:inline-flex;align-items:center;gap:3px}
+
+  .bars{display:flex;align-items:flex-end;gap:3px;height:62px;margin-top:10px}
+  .bars i{flex:1;background:#DCE5FB;border-radius:2px 2px 0 0;display:block}
+  .bars i.hot{background:var(--brand)}
+
+  .catrow{margin-top:10px}
+  .catrow .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+  .catrow .top b{font-weight:600}
+  .track{height:6px;background:var(--bg-alt);border-radius:999px;overflow:hidden}
+  .track i{display:block;height:100%;border-radius:999px}
+
+  .listrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .listrow:last-child{border-bottom:0}
+  .listrow .t{font-size:14px;font-weight:600}
+  .listrow .m{font-size:12px;color:var(--text-2);margin-top:1px}
+  .listrow .r{text-align:right}
+  .listrow .amt{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+
+  .sec-title{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--text-2)}
+
+  .tabbar{display:flex;background:#FFF;border-top:1px solid var(--border);padding:8px 4px 12px;margin-top:auto}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--text-3);font-weight:500}
+  .tab.on{color:var(--brand);font-weight:600}
+  .tab svg{width:22px;height:22px}
+  .tab .dot{width:4px;height:4px;border-radius:50%;background:var(--brand);margin-top:1px}
+
+  /* scanner */
+  .viewfinder{position:relative;background:#0E1726;border-radius:var(--r-lg);height:290px;display:grid;place-items:center;overflow:hidden}
+  .vf-box{width:180px;height:180px;position:relative}
+  .vf-box i{position:absolute;width:26px;height:26px;border:3px solid #FFF;border-radius:4px}
+  .vf-box i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0}
+  .vf-box i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0}
+  .vf-box i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0}
+  .vf-box i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0}
+  .vf-hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#C9D3E6;font-size:12px}
+  .torch{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;color:#FFF}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .thumb{background:#FFF;border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+  .thumb .ph{height:74px;background:linear-gradient(135deg,#E9EEF7,#D7E1F2);display:grid;place-items:center;color:#9BA9C4}
+  .thumb .cap{padding:6px 7px}
+  .thumb .cap b{display:block;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thumb .cap span{font-size:10px;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+  /* settings */
+  .group{background:#FFF;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+  .group .g-lbl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);padding:10px 14px 4px;background:#FCFDFE}
+  .srow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-top:1px solid var(--border);font-size:14px}
+  .srow:first-of-type{border-top:0}
+  .srow .v{color:var(--text-2);font-size:13px;display:flex;align-items:center;gap:6px}
+  .srow.danger{color:var(--danger);font-weight:600}
+  .chev{width:6px;height:6px;border-right:1.6px solid var(--text-3);border-top:1.6px solid var(--text-3);transform:rotate(45deg)}
+
+  .banner{display:flex;gap:8px;align-items:flex-start;background:var(--warning-tint);color:#6B4600;border-radius:var(--r-md);padding:10px 12px;font-size:12px;line-height:1.5}
+  .badge-review{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--warning-tint);color:var(--warning);white-space:nowrap}
+
+  .ocr-line{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .ocr-line .k{font-size:12px;color:var(--text-2);font-weight:500}
+  .ocr-val{background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+  .ocr-text{background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:11px;line-height:1.6;color:var(--text-2);max-height:74px;overflow:hidden}
+
+  .empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:24px 12px}
+  .empty .art{width:96px;height:72px;border-radius:14px;background:linear-gradient(135deg,#EAF0FF,#D9E4FB);display:grid;place-items:center;color:#7D96D8}
+  .empty b{font-size:15px}
+  .empty p{margin:0;font-size:13px;color:var(--text-2);max-width:26ch}
+
+  .fab{position:relative}
+  .fab button{width:44px;height:44px;border-radius:50%;border:0;background:var(--brand);color:#fff;display:grid;place-items:center;box-shadow:0 6px 16px rgba(31,79,216,.3)}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--text-2);margin-top:14px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:10px;height:10px;border-radius:3px;display:block}
+
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid #DDE3ED;font-size:13px;color:var(--text-2)}
+  @media (max-width:760px){ .wrap{padding:28px 16px 64px} .page-head h1{font-size:26px} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8"/><path d="M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8"/><path d="M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16"/><path d="M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13"/><path d="M7 12h13"/><path d="M7 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9.5 8h5"/><path d="M9.5 12h5"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 9h.1a2 2 0 1 1 0 4H21a1.7 1.7 0 0 0-1.6 2z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8.5h2.5L8 6h8l1.5 2.5H20v11H4z"/><circle cx="12" cy="13.5" r="3.2"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m5 17 4.5-4.5L13 16l2.5-2.5L20 18"/></symbol>
+  <symbol id="i-torch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3h6v3l-1.5 2v3L12 13l-1.5-2V8L9 6z"/><path d="M12 13v7"/><path d="M8.5 20h7"/></symbol>
+</svg>
+
+<div class="wrap">
+
+  <header class="page-head">
+    <p class="eyebrow">Phase 2 · Design Review</p>
+    <h1>Receipt &amp; Expense Tracker — Design Preview</h1>
+    <p>หน้านี้เป็น <b>แบบร่างเพื่อการตรวจสอบ</b> ไม่ใช่โค้ดแอป และไม่ได้ผูกกับโปรเจกต์ ReceiptLedger เดิม —
+       ใช้ดู Palette A, มาตรฐานตัวอักษร/ระยะ, คอมโพเนนต์ และโครงหน้าจอ 5 แท็บ</p>
+    <div class="note">
+      <span>ⓘ</span>
+      <span>สเกลหน้าจอในภาพคือ 360pt (อ้างอิงช่วง iPhone รุ่นเล็ก–กลาง) · สีทุกสีมาจากโทเคนเดียวกับที่ระบุใน Phase 2 ·
+      ชุดสี B/C ยังไม่รวมอยู่ในหน้านี้เพราะยังไม่ได้วัด contrast</span>
+    </div>
+  </header>
+
+  <!-- 01 PALETTE -->
+  <section>
+    <div class="sec-head">
+      <span class="num">01</span>
+      <h2>Palette A — “Ledger Ink”</h2>
+      <p>พื้นเทาอ่อนอมฟ้า + indigo เข้มเป็นสีหลัก</p>
+    </div>
+
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#F7F8FA"></div><div class="meta"><div class="token">bg/base</div><div class="hex">#F7F8FA</div><div class="use">พื้นหลังหน้าจอ</div></div></div>
+      <div class="sw"><div class="chip" style="background:#FFFFFF"></div><div class="meta"><div class="token">bg/surface</div><div class="hex">#FFFFFF</div><div class="use">การ์ด ฟอร์ม ชีต</div></div></div>
+      <div class="sw"><div class="chip" style="background:#EEF1F6"></div><div class="meta"><div class="token">bg/surfaceAlt</div><div class="hex">#EEF1F6</div><div class="use">ช่องกรอก segmented</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E2E7EF"></div><div class="meta"><div class="token">border/hairline</div><div class="hex">#E2E7EF</div><div class="use">เส้นคั่น ขอบการ์ด</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0E1726"></div><div class="meta"><div class="token">text/primary</div><div class="hex">#0E1726</div><div class="use">หัวข้อ ยอดเงิน</div></div></div>
+      <div class="sw"><div class="chip" style="background:#55617A"></div><div class="meta"><div class="token">text/secondary</div><div class="hex">#55617A</div><div class="use">คำอธิบาย label</div></div></div>
+      <div class="sw"><div class="chip" style="background:#8A94A8"></div><div class="meta"><div class="token">text/tertiary</div><div class="hex">#8A94A8</div><div class="use">placeholder เท่านั้น</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1F4FD8"></div><div class="meta"><div class="token">brand/primary</div><div class="hex">#1F4FD8</div><div class="use">ปุ่มหลัก ลิงก์</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1A42B8"></div><div class="meta"><div class="token">brand/pressed</div><div class="hex">#1A42B8</div><div class="use">สถานะกด</div></div></div>
+      <div class="sw"><div class="chip" style="background:#EAF0FF"></div><div class="meta"><div class="token">brand/tint</div><div class="hex">#EAF0FF</div><div class="use">พื้นไอคอน chip</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0B7A54"></div><div class="meta"><div class="token">success</div><div class="hex">#0B7A54</div><div class="use">ซิงก์สำเร็จ ยอดลด</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E6F4EE"></div><div class="meta"><div class="token">success/tint</div><div class="hex">#E6F4EE</div><div class="use">พื้น badge สำเร็จ</div></div></div>
+      <div class="sw"><div class="chip" style="background:#B42318"></div><div class="meta"><div class="token">danger</div><div class="hex">#B42318</div><div class="use">ลบ ผิดพลาด</div></div></div>
+      <div class="sw"><div class="chip" style="background:#FCECEA"></div><div class="meta"><div class="token">danger/tint</div><div class="hex">#FCECEA</div><div class="use">พื้น badge error</div></div></div>
+      <div class="sw"><div class="chip" style="background:#8A5A00"></div><div class="meta"><div class="token">warning</div><div class="hex">#8A5A00</div><div class="use">รอยืนยัน confidence ต่ำ</div></div></div>
+      <div class="sw"><div class="chip" style="background:#FDF3E2"></div><div class="meta"><div class="token">warning/tint</div><div class="hex">#FDF3E2</div><div class="use">พื้น badge รอยืนยัน</div></div></div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <table>
+        <thead><tr><th>คู่สีที่ใช้จริง</th><th>Ratio</th><th>ผล</th><th>ใช้ที่</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">#0E1726 บน #FFFFFF</td><td class="mono">≈ 18.0 : 1</td><td class="pass">AAA ✓</td><td>หัวข้อ ยอดเงิน</td></tr>
+          <tr><td class="mono">#1F4FD8 บน #FFFFFF</td><td class="mono">≈ 6.6 : 1</td><td class="pass">AA ✓</td><td>ลิงก์ ตัวอักษรเน้น</td></tr>
+          <tr><td class="mono">#FFFFFF บน #1F4FD8</td><td class="mono">≈ 6.6 : 1</td><td class="pass">AA ✓</td><td>ข้อความบนปุ่มหลัก</td></tr>
+          <tr><td class="mono">#55617A บน #F7F8FA</td><td class="mono">≈ 5.9 : 1</td><td class="pass">AA ✓</td><td>คำอธิบาย label</td></tr>
+          <tr><td class="mono">#0B7A54 บน #FFFFFF</td><td class="mono">≈ 5.3 : 1</td><td class="pass">AA ✓</td><td>badge สำเร็จ</td></tr>
+          <tr><td class="mono">#B42318 บน #FFFFFF</td><td class="mono">≈ 6.6 : 1</td><td class="pass">AA ✓</td><td>ข้อความแจ้งลบ</td></tr>
+          <tr><td class="mono">#8A94A8 บน #FFFFFF</td><td class="mono">≈ 3.0 : 1</td><td class="warn">⚠ ห้ามใช้เป็นเนื้อความ</td><td>placeholder / ตัวใหญ่เท่านั้น</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:#1F4FD8"></i>กราฟ 1</span>
+      <span><i style="background:#0B7A54"></i>กราฟ 2</span>
+      <span><i style="background:#6D3FCF"></i>กราฟ 3</span>
+      <span><i style="background:#B25E09"></i>กราฟ 4</span>
+      <span><i style="background:#0E7C86"></i>กราฟ 5</span>
+      <span><i style="background:#B42318"></i>กราฟ 6</span>
+      <span><i style="background:#7A4E2D"></i>กราฟ 7</span>
+      <span><i style="background:#1D6FA5"></i>กราฟ 8</span>
+    </div>
+  </section>
+
+  <!-- 02 TYPOGRAPHY -->
+  <section>
+    <div class="sec-head">
+      <span class="num">02</span>
+      <h2>Typography</h2>
+      <p>ฟอนต์ที่แสดง = IBM Plex Sans Thai (ตัวเลือก A) · ถ้าโหลดไม่ได้จะ fallback เป็นฟอนต์ระบบ</p>
+    </div>
+    <div class="card">
+      <div class="type-row"><div class="k">display/amount<br>34 / 42 · 700</div><div class="t-amount">฿12,480.50</div></div>
+      <div class="type-row"><div class="k">title/h1<br>24 / 34 · 700</div><div class="t-h1">รายจ่ายเดือนตุลาคม</div></div>
+      <div class="type-row"><div class="k">title/h2<br>20 / 30 · 600</div><div class="t-h2">สรุปตามหมวดหมู่</div></div>
+      <div class="type-row"><div class="k">body<br>16 / 26 · 400</div><div class="t-body">บันทึกใบเสร็จ ถ่ายรูป หรือสแกนรหัส แล้วตรวจสอบยอดก่อนบันทึกทุกครั้ง ข้อมูลจะซิงก์เมื่อมีการเชื่อมต่อ</div></div>
+      <div class="type-row"><div class="k">label<br>14 / 22 · 500</div><div class="t-label">ยอดสุทธิ · วิธีชำระเงิน · หมายเหตุ</div></div>
+      <div class="type-row"><div class="k">caption<br>12 / 18 · 400</div><div class="t-caption">อัปเดตล่าสุด วันนี้ 14:32 น.</div></div>
+    </div>
+    <div class="note"><span>ⓘ</span><span>ตัวเลขทุกจุดใช้ <span class="mono">tabular-nums</span> เพื่อให้หลักตรงกันในลิสต์ · THB แสดงทศนิยม 2 ตำแหน่งเสมอ · ค่าลบใช้เครื่องหมายลบ ไม่ใช้วงเล็บ</span></div>
+  </section>
+
+  <!-- 03 TOKENS -->
+  <section>
+    <div class="sec-head"><span class="num">03</span><h2>Spacing · Radius · Elevation</h2></div>
+    <div class="card">
+      <div class="tok-grid">
+        <div>
+          <div class="lbl">Spacing scale (4pt)</div>
+          <div class="space-demo">
+            <i style="width:4px;height:16px"></i><i style="width:8px;height:24px"></i><i style="width:12px;height:32px"></i>
+            <i style="width:16px;height:40px"></i><i style="width:20px;height:48px"></i><i style="width:24px;height:56px"></i>
+            <i style="width:32px;height:64px"></i><i style="width:40px;height:72px"></i>
+          </div>
+          <div class="t-caption" style="margin-top:8px">4 · 8 · 12 · 16 · 20 · 24 · 32 · 40</div>
+        </div>
+        <div>
+          <div class="lbl">Radius</div>
+          <div class="radius-demo">
+            <span style="border-radius:8px">8</span><span style="border-radius:12px">12</span>
+            <span style="border-radius:16px">16</span><span style="border-radius:24px">24</span>
+            <span style="border-radius:999px">full</span>
+          </div>
+        </div>
+        <div>
+          <div class="lbl">Elevation</div>
+          <div class="elev-demo">
+            <div style="border:1px solid var(--border)">card<br>hairline</div>
+            <div style="box-shadow:0 -8px 24px rgba(14,23,38,.12)">sheet</div>
+            <div style="box-shadow:0 6px 16px rgba(31,79,216,.28)">FAB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 COMPONENTS -->
+  <section>
+    <div class="sec-head"><span class="num">04</span><h2>Components &amp; States</h2><p>ทุกคอนโทรลต้องมี state ครบ</p></div>
+    <div class="card">
+      <div class="comp">
+
+        <div class="stack">
+          <div class="lbl">Button</div>
+          <button class="btn btn-primary">บันทึกรายจ่าย</button>
+          <div class="row">
+            <button class="btn btn-primary btn-sm is-pressed">กำลังกด</button>
+            <button class="btn btn-primary btn-sm is-disabled">ปิดใช้งาน</button>
+            <button class="btn btn-primary btn-sm"><span class="spinner"></span> กำลังบันทึก</button>
+          </div>
+          <button class="btn btn-secondary">ยกเลิก</button>
+          <div class="row">
+            <button class="btn btn-ghost btn-sm">ดูทั้งหมด ›</button>
+            <button class="btn btn-danger btn-sm">ลบรายการ</button>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="lbl">Input</div>
+          <div class="field">
+            <label>ชื่อรายการ</label>
+            <input value="กาแฟลาเต้" />
+          </div>
+          <div class="field is-error">
+            <label>ยอดเงิน</label>
+            <input value="0" />
+            <div class="err">ยอดเงินต้องมากกว่า 0</div>
+          </div>
+          <div class="field">
+            <label>หมายเหตุ</label>
+            <input placeholder="ไม่บังคับ" />
+            <div class="hint">placeholder ใช้สี text/tertiary เท่านั้น</div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="lbl">Status chip — สถานะซิงก์/ความน่าเชื่อถือ</div>
+          <div class="row">
+            <span class="status s-synced">✓ ซิงก์แล้ว</span>
+            <span class="status s-pending">◌ รอซิงก์</span>
+            <span class="status s-syncing">⟳ กำลังซิงก์</span>
+            <span class="status s-failed">! ล้มเหลว</span>
+          </div>
+          <div class="row"><span class="status s-review">รอยืนยัน</span><span class="t-caption">ใช้กับค่าที่ OCR อ่านได้</span></div>
+          <div class="lbl" style="margin-top:6px">Filter / Segmented</div>
+          <div class="row">
+            <span class="pill is-active">ทั้งหมด</span><span class="pill">อาหาร</span><span class="pill">เดินทาง</span>
+          </div>
+          <div class="seg"><span class="on">เดือนนี้</span><span>ปีนี้</span><span>กำหนดเอง</span></div>
+        </div>
+
+        <div class="stack">
+          <div class="lbl">List row</div>
+          <div class="pcard tight">
+            <div class="listrow" style="border-bottom:1px solid var(--border)">
+              <div><div class="t">7-Eleven</div><div class="m">อาหาร · วันนี้ 09:12</div></div>
+              <div class="r"><div class="amt">฿128.00</div><div class="status s-synced" style="margin-top:4px">✓ ซิงก์แล้ว</div></div>
+            </div>
+            <div class="listrow">
+              <div><div class="t">Grab Bike</div><div class="m">เดินทาง · เมื่อวาน</div></div>
+              <div class="r"><div class="amt">฿182.00</div><div class="status s-pending" style="margin-top:4px">◌ รอซิงก์</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="lbl">Skeleton / Empty / Error</div>
+          <div class="stack" style="gap:7px">
+            <div class="skel" style="width:70%"></div>
+            <div class="skel" style="width:90%"></div>
+            <div class="skel" style="width:45%"></div>
+          </div>
+          <div class="pcard tight empty" style="padding:16px 10px">
+            <div class="art">🧾</div>
+            <b>ยังไม่มีรายจ่ายเดือนนี้</b>
+            <p>เริ่มจากสแกนใบเสร็จหรือเพิ่มรายการเอง</p>
+            <div class="row" style="justify-content:center"><span class="pill is-active">สแกนใบเสร็จ</span><span class="pill">เพิ่มเอง</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 SCREENS -->
+  <section>
+    <div class="sec-head"><span class="num">05</span><h2>Wireframes — 5 แท็บ + Auth + OCR Review</h2><p>โครงจริงของแต่ละหน้าจอ</p></div>
+
+    <div class="phones">
+
+      <!-- WELCOME -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Welcome</b><span>ก่อนเข้าสู่ระบบ</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen" style="justify-content:center;gap:22px">
+            <div style="text-align:center">
+              <div style="width:64px;height:64px;border-radius:20px;background:var(--brand);color:#fff;display:grid;place-items:center;margin:0 auto 14px;font-weight:700;font-size:26px">฿</div>
+              <div class="t-h1" style="margin-bottom:4px">Receipt Ledger</div>
+              <div class="t-body" style="color:var(--text-2);font-size:14px">บันทึกใบเสร็จ จัดหมวดรายจ่าย<br>และดูยอดรวมได้ในที่เดียว</div>
+            </div>
+            <div class="stack" style="gap:10px">
+              <button class="btn btn-primary">เริ่มใช้งานฟรี</button>
+              <button class="btn btn-secondary">เข้าสู่ระบบ</button>
+            </div>
+            <div class="t-caption" style="text-align:center">การใช้งานถือว่ายอมรับ<br><span style="color:var(--brand);font-weight:600">นโยบายความเป็นส่วนตัว</span> และ <span style="color:var(--brand);font-weight:600">ข้อกำหนดการใช้งาน</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGN IN -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Sign In</b><span>ฟอร์ม + inline error</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen">
+            <div class="hdr"><span style="font-size:20px;color:var(--text-2)">‹</span></div>
+            <div>
+              <div class="t-h1">เข้าสู่ระบบ</div>
+              <div class="t-label" style="margin-top:2px">กรุณากรอกอีเมลและรหัสผ่าน</div>
+            </div>
+            <div class="stack" style="gap:14px">
+              <div class="field"><label>อีเมล</label><input value="pan@example.com" /></div>
+              <div class="field is-error">
+                <label>รหัสผ่าน</label><input value="••••••••" />
+                <div class="err">อีเมลหรือรหัสผ่านไม่ถูกต้อง</div>
+              </div>
+              <div style="text-align:right"><span class="link">ลืมรหัสผ่าน?</span></div>
+              <button class="btn btn-primary">เข้าสู่ระบบ</button>
+            </div>
+            <div class="t-caption" style="text-align:center;margin-top:auto">ยังไม่มีบัญชี? <span style="color:var(--brand);font-weight:600">สมัครสมาชิก</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Tab 1 — หน้าหลัก</b><span>มีข้อมูล</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen">
+            <div class="hdr">
+              <div><h3>สวัสดี, ปันปัน</h3><div class="sub">วันศุกร์ที่ 24 ตุลาคม</div></div>
+              <div class="avatar">ป</div>
+            </div>
+
+            <div class="pcard">
+              <div class="lbl">ยอดใช้จ่ายเดือนนี้</div>
+              <div class="amount">฿12,480.50</div>
+              <div class="row" style="justify-content:space-between">
+                <span class="delta up">▲ 8% เทียบเดือนที่แล้ว</span>
+                <span class="seg"><span class="on">เดือนนี้</span><span>ปีนี้</span></span>
+              </div>
+              <div class="bars" aria-hidden="true">
+                <i style="height:22%"></i><i style="height:38%"></i><i style="height:30%"></i><i style="height:55%"></i>
+                <i style="height:47%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:44%"></i>
+                <i style="height:80%"></i><i class="hot" style="height:100%"></i><i style="height:58%"></i><i style="height:35%"></i>
+                <i style="height:28%"></i><i style="height:50%"></i>
+              </div>
+              <div class="row" style="justify-content:space-between;margin-top:8px">
+                <span class="t-caption">1 ต.ค.</span><span class="link">ดูกราฟทั้งหมด ›</span><span class="t-caption">31 ต.ค.</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="sec-title"><span>หมวดหมู่</span><span class="link">ทั้งหมด ›</span></div>
+              <div class="catrow">
+                <div class="top"><b>อาหาร</b><span class="mono">฿4,120 · 42%</span></div>
+                <div class="track"><i style="width:42%;background:#1F4FD8"></i></div>
+              </div>
+              <div class="catrow">
+                <div class="top"><b>เดินทาง</b><span class="mono">฿2,880 · 29%</span></div>
+                <div class="track"><i style="width:29%;background:#0B7A54"></i></div>
+              </div>
+              <div class="catrow">
+                <div class="top"><b>ช้อปปิ้ง</b><span class="mono">฿1,940 · 20%</span></div>
+                <div class="track"><i style="width:20%;background:#6D3FCF"></i></div>
+              </div>
+            </div>
+
+            <div class="pcard tight">
+              <div class="sec-title" style="margin-bottom:2px"><span>ล่าสุด</span><span class="link">ดูทั้งหมด ›</span></div>
+              <div class="listrow">
+                <div><div class="t">7-Eleven</div><div class="m">อาหาร · วันนี้</div></div>
+                <div class="r"><div class="amt">฿128.00</div><div class="status s-synced" style="margin-top:3px">✓ ซิงก์แล้ว</div></div>
+              </div>
+              <div class="listrow">
+                <div><div class="t">BTS</div><div class="m">เดินทาง · เมื่อวาน</div></div>
+                <div class="r"><div class="amt">฿59.00</div><div class="status s-synced" style="margin-top:3px">✓ ซิงก์แล้ว</div></div>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab on"><svg><use href="#i-home"/></svg>หน้าหลัก<div class="dot"></div></div>
+              <div class="tab"><svg><use href="#i-scan"/></svg>สแกน</div>
+              <div class="tab"><svg><use href="#i-list"/></svg>รายจ่าย</div>
+              <div class="tab"><svg><use href="#i-receipt"/></svg>ใบเสร็จ</div>
+              <div class="tab"><svg><use href="#i-gear"/></svg>ตั้งค่า</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD EMPTY -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Tab 1 — หน้าหลัก</b><span>Empty state (ยอด ฿0.00)</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen">
+            <div class="hdr">
+              <div><h3>สวัสดี, ปันปัน</h3><div class="sub">ยังไม่มีรายการในเดือนนี้</div></div>
+              <div class="avatar">ป</div>
+            </div>
+            <div class="pcard">
+              <div class="lbl">ยอดใช้จ่ายเดือนนี้</div>
+              <div class="amount">฿0.00</div>
+              <div class="row"><span class="status s-pending">ยังไม่มีข้อมูล</span></div>
+            </div>
+            <div class="pcard empty" style="padding:28px 16px">
+              <div class="art">🧾</div>
+              <b>ยังไม่มีรายจ่ายเดือนนี้</b>
+              <p>เริ่มจากสแกนใบเสร็จ หรือเพิ่มรายการเองก็ได้</p>
+              <div class="row" style="justify-content:center;margin-top:6px">
+                <button class="btn btn-primary btn-sm">สแกนใบเสร็จ</button>
+                <button class="btn btn-secondary btn-sm">เพิ่มเอง</button>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab on"><svg><use href="#i-home"/></svg>หน้าหลัก<div class="dot"></div></div>
+              <div class="tab"><svg><use href="#i-scan"/></svg>สแกน</div>
+              <div class="tab"><svg><use href="#i-list"/></svg>รายจ่าย</div>
+              <div class="tab"><svg><use href="#i-receipt"/></svg>ใบเสร็จ</div>
+              <div class="tab"><svg><use href="#i-gear"/></svg>ตั้งค่า</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCANNER -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Tab 2 — สแกน</b><span>QR / Barcode + ไฟฉาย</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen">
+            <div class="hdr">
+              <h3>สแกน</h3>
+              <div class="seg"><span class="on">QR</span><span>Barcode</span></div>
+            </div>
+
+            <div class="viewfinder">
+              <div class="torch"><svg style="width:19px;height:19px"><use href="#i-torch"/></svg></div>
+              <div class="vf-box"><i></i><i></i><i></i><i></i></div>
+              <div class="vf-hint">เล็งรหัสให้อยู่ในกรอบ</div>
+            </div>
+
+            <div class="t-caption" style="text-align:center">สแกนรหัสเพื่อดึงข้อมูลร้าน/โปรโมชัน — ไม่ใช่การอ่านยอดเงิน</div>
+
+            <div class="stack" style="gap:10px;margin-top:2px">
+              <button class="btn btn-secondary"><svg style="width:18px;height:18px"><use href="#i-image"/></svg> เลือกรูปจากคลังภาพ</button>
+              <button class="btn btn-primary"><svg style="width:18px;height:18px"><use href="#i-camera"/></svg> ถ่ายใบเสร็จ → อ่านด้วย OCR</button>
+            </div>
+
+            <div class="pcard tight" style="margin-top:auto">
+              <div class="t-caption" style="display:flex;gap:6px"><span>ⓘ</span><span>บน iOS การอ่านรหัสจากรูปที่เลือก รองรับเฉพาะ QR Code</span></div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><svg><use href="#i-home"/></svg>หน้าหลัก</div>
+              <div class="tab on"><svg><use href="#i-scan"/></svg>สแกน<div class="dot"></div></div>
+              <div class="tab"><svg><use href="#i-list"/></svg>รายจ่าย</div>
+              <div class="tab"><svg><use href="#i-receipt"/></svg>ใบเสร็จ</div>
+              <div class="tab"><svg><use href="#i-gear"/></svg>ตั้งค่า</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPENSES -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Tab 3 — รายจ่าย</b><span>ค้นหา กรอง รวมยอดตามเดือน</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen">
+            <div class="hdr">
+              <h3>รายจ่าย</h3>
+              <div class="fab"><button aria-label="เพิ่มรายจ่าย"><svg style="width:20px;height:20px"><use href="#i-plus"/></svg></button></div>
+            </div>
+
+            <div class="field"><input placeholder="ค้นหาร้าน ชื่อรายการ หรือหมายเหตุ" style="padding-left:38px;background:#FFF;border-color:var(--border)" /></div>
+
+            <div class="row" style="gap:6px">
+              <span class="pill is-active">ตุลาคม ▾</span>
+              <span class="pill">หมวดหมู่ ▾</span>
+              <span class="pill">เรียง: ใหม่→เก่า ▾</span>
+            </div>
+
+            <div class="pcard tight">
+              <div class="sec-title"><span>ตุลาคม 2026</span><span class="mono" style="color:var(--text-1)">฿5,120.00</span></div>
+              <div class="listrow">
+                <div><div class="t">7-Eleven</div><div class="m">อาหาร · 24 ต.ค. · 🧾 แนบใบเสร็จ</div></div>
+                <div class="r"><div class="amt">฿128.00</div><div class="status s-synced" style="margin-top:3px">✓ ซิงก์แล้ว</div></div>
+              </div>
+              <div class="listrow">
+                <div><div class="t">Grab Bike</div><div class="m">เดินทาง · 23 ต.ค.</div></div>
+                <div class="r"><div class="amt">฿182.00</div><div class="status s-pending" style="margin-top:3px">◌ รอซิงก์</div></div>
+              </div>
+              <div class="listrow">
+                <div><div class="t">บิ๊กซี รัชดา</div><div class="m">ช้อปปิ้ง · 22 ต.ค. · 🧾 แนบใบเสร็จ</div></div>
+                <div class="r"><div class="amt">฿1,240.00</div><div class="status s-failed" style="margin-top:3px">! ล้มเหลว</div></div>
+              </div>
+            </div>
+
+            <div class="pcard tight">
+              <div class="sec-title"><span>กันยายน 2026</span><span class="mono" style="color:var(--text-1)">฿11,540.00</span></div>
+              <div class="listrow" style="border-bottom:0">
+                <div><div class="t">ส้มตำนัว</div><div class="m">อาหาร · 30 ก.ย.</div></div>
+                <div class="r"><div class="amt">฿260.00</div></div>
+              </div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><svg><use href="#i-home"/></svg>หน้าหลัก</div>
+              <div class="tab"><svg><use href="#i-scan"/></svg>สแกน</div>
+              <div class="tab on"><svg><use href="#i-list"/></svg>รายจ่าย<div class="dot"></div></div>
+              <div class="tab"><svg><use href="#i-receipt"/></svg>ใบเสร็จ</div>
+              <div class="tab"><svg><use href="#i-gear"/></svg>ตั้งค่า</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECEIPTS -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Tab 4 — ใบเสร็จ</b><span>ชื่อเดิม “Receipt Vault”</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen">
+            <div class="hdr">
+              <h3>ใบเสร็จ</h3>
+              <div class="fab"><button aria-label="อัปโหลด"><svg style="width:20px;height:20px"><use href="#i-plus"/></svg></button></div>
+            </div>
+
+            <div class="field"><input placeholder="ค้นหาร้าน วันที่ หรือข้อความในใบเสร็จ" style="background:#FFF" /></div>
+
+            <div class="seg" style="align-self:flex-start"><span class="on">ทั้งหมด</span><span>ผูกแล้ว</span><span>ยังไม่ผูก</span></div>
+
+            <div class="grid3">
+              <div class="thumb">
+                <div class="ph"><svg style="width:22px;height:22px"><use href="#i-image"/></svg></div>
+                <div class="cap"><b>7-Eleven</b><span>฿128.00</span></div>
+              </div>
+              <div class="thumb">
+                <div class="ph"><svg style="width:22px;height:22px"><use href="#i-image"/></svg></div>
+                <div class="cap"><b>บิ๊กซี</b><span>฿1,240.00</span></div>
+              </div>
+              <div class="thumb">
+                <div class="ph"><svg style="width:22px;height:22px"><use href="#i-image"/></svg></div>
+                <div class="cap"><b>BTS</b><span>฿59.00</span></div>
+              </div>
+              <div class="thumb">
+                <div class="ph"><svg style="width:22px;height:22px"><use href="#i-image"/></svg></div>
+                <div class="cap"><b>ร้านกาแฟ</b><span>฿95.00</span></div>
+              </div>
+              <div class="thumb">
+                <div class="ph" style="background:#F4F6FA"><span class="status s-pending" style="font-size:9px">รออัปโหลด</span></div>
+                <div class="cap"><b>ส้มตำนัว</b><span>฿260.00</span></div>
+              </div>
+              <div class="thumb">
+                <div class="ph"><svg style="width:22px;height:22px"><use href="#i-image"/></svg></div>
+                <div class="cap"><b>ปั๊มน้ำมัน</b><span>฿900.00</span></div>
+              </div>
+            </div>
+
+            <div class="pcard tight" style="margin-top:auto">
+              <div class="sec-title"><span>สถานะการซิงก์</span><span class="link">จัดการ ›</span></div>
+              <div class="t-caption" style="margin-top:4px">1 ใบรออัปโหลด · 0 ล้มเหลว</div>
+            </div>
+
+            <div class="tabbar">
+              <div class="tab"><svg><use href="#i-home"/></svg>หน้าหลัก</div>
+              <div class="tab"><svg><use href="#i-scan"/></svg>สแกน</div>
+              <div class="tab"><svg><use href="#i-list"/></svg>รายจ่าย</div>
+              <div class="tab on"><svg><use href="#i-receipt"/></svg>ใบเสร็จ<div class="dot"></div></div>
+              <div class="tab"><svg><use href="#i-gear"/></svg>ตั้งค่า</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>Tab 5 — ตั้งค่า</b><span>จัดกลุ่มตามหมวด</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen" style="gap:12px">
+            <div class="hdr"><h3>ตั้งค่า</h3></div>
+
+            <div class="pcard tight" style="display:flex;gap:12px;align-items:center">
+              <div class="avatar">ป</div>
+              <div><div style="font-size:14px;font-weight:600">ปันปัน</div><div class="t-caption">pan@example.com</div></div>
+            </div>
+
+            <div class="group">
+              <div class="g-lbl">บัญชี</div>
+              <div class="srow"><span>โปรไฟล์</span><span class="v"><i class="chev"></i></span></div>
+              <div class="srow"><span>เปลี่ยนรหัสผ่าน</span><span class="v"><i class="chev"></i></span></div>
+              <div class="srow danger"><span>ลบบัญชีและข้อมูล</span><span class="v"><i class="chev"></i></span></div>
+            </div>
+
+            <div class="group">
+              <div class="g-lbl">การเงิน</div>
+              <div class="srow"><span>สกุลเงิน</span><span class="v">THB ฿<i class="chev"></i></span></div>
+              <div class="srow"><span>หมวดหมู่รายจ่าย</span><span class="v">9 หมวด<i class="chev"></i></span></div>
+            </div>
+
+            <div class="group">
+              <div class="g-lbl">ข้อมูล</div>
+              <div class="srow"><span>สำรอง/ส่งออก CSV &amp; PDF</span><span class="v"><i class="chev"></i></span></div>
+              <div class="srow"><span>สถานะการซิงก์</span><span class="v"><span class="status s-pending">1 รอซิงก์</span><i class="chev"></i></span></div>
+            </div>
+
+            <div class="group">
+              <div class="g-lbl">ความเป็นส่วนตัว</div>
+              <div class="srow"><span>สิทธิ์การเข้าถึง</span><span class="v"><i class="chev"></i></span></div>
+              <div class="srow"><span>นโยบายความเป็นส่วนตัว</span><span class="v"><i class="chev"></i></span></div>
+            </div>
+
+            <div class="t-caption" style="text-align:center;margin-top:auto">เวอร์ชัน 1.0.0 · ช่วยเหลือ</div>
+
+            <div class="tabbar">
+              <div class="tab"><svg><use href="#i-home"/></svg>หน้าหลัก</div>
+              <div class="tab"><svg><use href="#i-scan"/></svg>สแกน</div>
+              <div class="tab"><svg><use href="#i-list"/></svg>รายจ่าย</div>
+              <div class="tab"><svg><use href="#i-receipt"/></svg>ใบเสร็จ</div>
+              <div class="tab on"><svg><use href="#i-gear"/></svg>ตั้งค่า<div class="dot"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OCR REVIEW -->
+      <div class="phone-wrap">
+        <div class="phone-cap"><b>OCR Review</b><span>หน้าสำคัญที่สุด — ต้องยืนยันก่อนบันทึก</span></div>
+        <div class="phone">
+          <div class="statusbar"><span>9:41</span><span class="dots"><i></i><i></i><i></i><span class="batt"></span></span></div>
+          <div class="screen" style="gap:12px">
+            <div class="hdr"><span style="font-size:20px;color:var(--text-2)">‹</span><h3 style="font-size:17px">ตรวจสอบใบเสร็จ</h3><span style="width:20px"></span></div>
+
+            <div class="pcard tight" style="display:flex;gap:12px;align-items:center">
+              <div style="width:56px;height:70px;border-radius:8px;background:linear-gradient(135deg,#E9EEF7,#D7E1F2);display:grid;place-items:center;color:#9BA9C4"><svg style="width:20px;height:20px"><use href="#i-image"/></svg></div>
+              <div><div style="font-size:13px;font-weight:600">receipt_2410.jpg</div><div class="t-caption">1.2 MB · แตะเพื่อขยาย</div></div>
+            </div>
+
+            <div class="banner"><span>ⓘ</span><span>ข้อมูลด้านล่างอ่านจากรูปด้วย OCR และ <b>ยังไม่ถูกบันทึก</b> — กรุณาตรวจสอบก่อนกดยืนยัน</span></div>
+
+            <div>
+              <div class="ocr-line"><span class="k">ร้านค้า</span><span class="badge-review">รอยืนยัน</span></div>
+              <div class="ocr-val">บิ๊กซี สาขารัชดา</div>
+            </div>
+            <div>
+              <div class="ocr-line"><span class="k">วันที่</span><span class="badge-review">รอยืนยัน</span></div>
+              <div class="ocr-val">24/10/2026</div>
+            </div>
+            <div>
+              <div class="ocr-line"><span class="k">ยอดสุทธิ</span><span class="badge-review">รอยืนยัน</span></div>
+              <div class="ocr-val" style="font-size:17px">฿1,240.00</div>
+            </div>
+            <div>
+              <div class="ocr-line"><span class="k">ภาษี (ถ้ามี)</span><span class="badge-review">รอยืนยัน</span></div>
+              <div class="ocr-val">฿81.12</div>
+            </div>
+
+            <div>
+              <div class="ocr-line"><span class="k">ข้อความที่อ่านได้</span><span class="link">ซ่อน</span></div>
+              <div class="ocr-text">บิ๊กซี ซูเปอร์เซ็นเตอร์ สาขารัชดาภิเษก<br>น้ำดื่ม 6 ขวด 128.00<br>ขนม 4 ชิ้น 96.00 ...<br>รวม 1,240.00<br>VAT 7% 81.12</div>
+            </div>
+
+            <div class="stack" style="gap:8px;margin-top:auto">
+              <button class="btn btn-primary">ยืนยันและบันทึก</button>
+              <button class="btn btn-ghost btn-sm">กรอกเองทั้งหมด</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    Phase 2 · static design preview — ไม่ใช่โค้ดแอป ไม่ได้แตะโปรเจกต์ ReceiptLedger เดิม<br>
+    สิ่งที่ต้องอนุมัติ: เลือก Palette (A/B/C) · เลือกฟอนต์ (IBM Plex Sans Thai / ฟอนต์ระบบ) · ยืนยันชื่อแท็บ 4 = “ใบเสร็จ” · light mode อย่างเดียวใน MVP
+  </footer>
+
+</div>
+</body>
+</html>

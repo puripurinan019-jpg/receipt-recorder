@@ -1,0 +1,35 @@
+# --- Freebuff app internal state (ไม่ใช่โค้ดโปรเจกต์) ---
+.freebuff/
+
+# --- Xcode ---
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+DerivedData/
+build/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# --- Swift Package Manager ---
+.build/
+.swiftpm/
+Package.resolved
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# --- Python (scripts/) ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# --- หมายเหตุ: ห้าม ignore สิ่งเหล่านี้ ---
+# ReceiptLedger.xcodeproj/project.pbxproj   (ต้อง commit)
+# .github/workflows/ci.yml                 (ต้อง commit)
+# scripts/*.py                             (ต้อง commit)
